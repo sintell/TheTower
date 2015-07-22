@@ -4,6 +4,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/jinzhu/gorm"
 	"github.com/sintell/mmo-server/utils"
+	"math"
 	"strings"
 )
 
@@ -46,6 +47,9 @@ func (this *Character) SetDefaults() {
 
 	this.HP = this.MaxHP
 	this.MP = this.MaxMP
+
+	this.RecalculateAttributes()
+
 	glog.Infof("Setting default stats for character %i:\nS : %i\nA : %i", this, defaultStats[this.Class], defaultAttributes[this.Class])
 }
 
@@ -53,13 +57,25 @@ func (this *Character) ApplyEffect(effects ...*Effect) Character {
 	return Character{}
 }
 
-func (this *Character) RecalculateStats() {
-	this.
+func (this *Character) RecalculateAttributes() {
+	this.RecalculateHp()
+	this.RecalculateMp()
 }
 
 func (this *Character) RecalculateHp() {
-	this.MaxHP = this.Strength * (0.25 * defaultAttrsibutes[strings.ToLower(this.Class)].Strength) +
-				 -20 * Math.cos(this.Level / 60 * (Math.PI/2)) + 20
+	difference := this.HP / this.MaxHP * 100
 
+	this.MaxHP = this.Strength*(0.25*defaultAttrsibutes[strings.ToLower(this.Class)].Strength) +
+		-20*math.Cos(this.Level/60*(math.Pi/2)) + 20
 
+	this.HP = this.MaxHP * difference / 100
+}
+
+func (this *Character) RecalculateMp() {
+	difference := this.MP / this.MaxMP * 100
+
+	this.MaxMP = this.Intelect*(0.25*defaultAttrsibutes[strings.ToLower(this.Class)].Intelect) +
+		-40*Math.cos(this.Level/60*(Math.PI/2)) + 40
+
+	this.MP = this.MaxMP * difference / 100
 }
