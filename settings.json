@@ -1,0 +1,13 @@
+{
+    "ip": "127.0.0.1",
+    "port": "9090",
+    "dbHost": "127.0.0.1",
+    "dbName": "mmo",
+    "dbPort": "",
+    "dbUser": "mmo",
+    "dbPass": "aSddoT",
+    "wsReadBuffSize": 1024,
+    "wsWriteBuffSize": 1024,
+    "logFilePath": "logs/",
+    "dataPath": "data/"
+}

@@ -1,0 +1,37 @@
+{
+    "goblin" : {
+        "name" : "Small goblin",
+        "level" : 1,
+        "class" : "warrior",
+        "maxHp" : 25,
+        "maxMp" : 1,
+        "hitChanse" : 10,
+        "critChanse" : 10,
+        "dodgeChance" : 10,
+        "lidership" : 0,
+        "trading" : 0,
+        "str": 5,
+        "agi": 2,
+        "int": 1,
+        "vit": 5,
+        "luk": 1
+    },
+
+    "orc" : {
+        "name" : "Young orc",
+        "level" : 1,
+        "class" : "warrior",
+        "maxHp" : 45,
+        "maxMp" : 3,
+        "hitChanse" : 15,
+        "critChanse" : 5,
+        "dodgeChance" : 5,
+        "lidership" : 2,
+        "trading" : 0,
+        "str": 7,
+        "agi": 5,
+        "int": 2,
+        "vit": 10,
+        "luk": 2
+    }
+}

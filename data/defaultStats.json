@@ -1,0 +1,29 @@
+{
+    "warrior" : {
+        "maxHp" : 100,
+        "maxMp" : 5,
+        "hitChanse" : 0,
+        "critChanse" : 0,
+        "dodgeChance" : 0,
+        "lidership" : 0,
+        "trading" : 0
+    },
+    "priest" : {
+        "maxHp" : 75,
+        "maxMp" : 30,
+        "hitChanse" : 0,
+        "critChanse" : 0,
+        "dodgeChance" : 0,
+        "lidership" : 0,
+        "trading" : 0
+    },
+    "mage" : {
+        "maxHp" : 55,
+        "maxMp" : 50,
+        "hitChanse" : 0,
+        "critChanse" : 0,
+        "dodgeChance" : 0,
+        "lidership" : 0,
+        "trading" : 0
+    }
+}

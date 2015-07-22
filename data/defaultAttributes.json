@@ -1,0 +1,23 @@
+{
+    "warrior" : {
+        "str": 10,
+        "agi": 5,
+        "int": 1,
+        "vit": 10,
+        "luk": 1
+    },
+    "priest" : {
+        "str": 5,
+        "agi": 5,
+        "int": 5,
+        "vit": 10,
+        "luk": 1
+    },
+    "mage" : {
+        "str": 1,
+        "agi": 5,
+        "int": 10,
+        "vit": 5,
+        "luk": 1
+    }
+}
