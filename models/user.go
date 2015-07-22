@@ -41,7 +41,7 @@ func (this *User) NewCharacter() error {
 	name := NewName(this.Email)
 	class := "MAGE"
 
-	character := Character{Name: name.String(), Class: class}
+	character := Character{Name: name.String(), Class: class, Owner: this}
 	character.SetDefaults()
 
 	this.Characters = append(this.Characters, character)

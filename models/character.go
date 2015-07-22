@@ -12,10 +12,11 @@ type Character struct {
 	Attributes
 	Stats
 	Level   uint   `json: "level"`
-	Name    string `json:"name" 		sql:"unique"`
+	Name    string `json:"name" sql:"unique"`
 	Class   string `json:"class"`
 	UserID  uint
 	Effects []*Effect `sql:"-"`
+	Owner   *User     `json:"-" sql:"-"`
 }
 
 type CClass uint8
@@ -48,6 +49,17 @@ func (this *Character) SetDefaults() {
 	glog.Infof("Setting default stats for character %i:\nS : %i\nA : %i", this, defaultStats[this.Class], defaultAttributes[this.Class])
 }
 
-func (c *Character) ApplyEffect(effects ...*Effect) Character {
+func (this *Character) ApplyEffect(effects ...*Effect) Character {
 	return Character{}
+}
+
+func (this *Character) RecalculateStats() {
+	this.
+}
+
+func (this *Character) RecalculateHp() {
+	this.MaxHP = this.Strength * (0.25 * defaultAttrsibutes[strings.ToLower(this.Class)].Strength) +
+				 -20 * Math.cos(this.Level / 60 * (Math.PI/2)) + 20
+
+
 }
