@@ -5,6 +5,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/jinzhu/gorm"
 	"github.com/sintell/mmo-server/utils"
+	"strings"
 )
 
 type Character struct {
@@ -42,11 +43,12 @@ func init() {
 }
 
 func (this *Character) SetDefaults() {
-	this.Stats = defaultStats[this.Class]
-	this.Attributes = defaultAttributes[this.Class]
+	this.Stats = defaultStats[strings.ToLower(this.Class)]
+	this.Attributes = defaultAttributes[strings.ToLower(this.Class)]
 
 	this.HP = this.MaxHP
 	this.MP = this.MaxMP
+	glog.Infof("Setting default stats for character %i:\nS : %i\nA : %i", this, defaultStats[this.Class], defaultAttributes[this.Class])
 }
 
 func (c *Character) ApplyEffect(effects ...*Effect) Character {
