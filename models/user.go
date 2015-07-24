@@ -10,12 +10,13 @@ import (
 
 type User struct {
 	gorm.Model
-	Name       string          `sql:"unique" json:"name"`
-	Email      string          `sql:"unique" json:"email"`
-	Age        uint8           `sql:"default:'18'" json:"age,omitempty"`
-	Uid        string          `sql:"default:'null';unique" json:"uid"`
-	Characters []Character     `sql:"" json:"characters"`
-	Connection *websocket.Conn `sql:"-"	json:"-"`
+	Name            string          `sql:"unique" json:"name"`
+	Email           string          `sql:"unique" json:"email"`
+	Age             uint8           `sql:"default:'18'" json:"age,omitempty"`
+	Uid             string          `sql:"default:'null';unique" json:"uid"`
+	Characters      []Character     `sql:"" json:"characters"`
+	Connection      *websocket.Conn `sql:"-"	json:"-"`
+	ActiveCharacter *Character      `sql:"-" json:"-"`
 }
 
 func NewUser() (*User, error) {
@@ -54,4 +55,24 @@ func (this *User) NewCharacter() error {
 	}
 
 	return nil
+}
+
+func (this *User) LoadCharacters() {
+	if len(this.Characters) == 0 {
+		if err := db.Model(this).Related(this.Characters).Error; err != nil {
+			glog.Errorf("Error requesting characters information: %s", err.Error())
+		} else {
+			glog.Infof("Characters loaded: %i", this.Characters)
+		}
+	}
+}
+
+func (this *User) SetActiveCharacter(characterId uint) *Character {
+	for _, char := range this.Characters {
+		if char.ID == characterId {
+			this.ActiveCharacter = &char
+		}
+	}
+
+	return this.ActiveCharacter
 }

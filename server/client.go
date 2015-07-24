@@ -74,6 +74,7 @@ func (this *Client) Handle() {
 				}
 
 				this.Send(this.User.Characters, message.MSG_CHARACTER_DATA)
+				game.LoginCharacter(this.User.Uid, &this.User.Characters[0])
 
 			}
 		case message.MSG_REMOVE_CHARACTER:
@@ -82,7 +83,15 @@ func (this *Client) Handle() {
 			}
 		case message.MSG_CHECK_CHARACTER:
 			{
+				glog.Info("Requested characters")
+				this.User.LoadCharacters()
+				var data []map[string]interface{}
 
+				for _, char := range this.User.Characters {
+					data = append(data, char.ShortData())
+				}
+
+				this.Send(data, message.MSG_CHARACTER_DATA)
 			}
 		case message.MSG_USER_ACTION:
 			{

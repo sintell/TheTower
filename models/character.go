@@ -41,6 +41,16 @@ func init() {
 	glog.Infof("Loaded default stats: %i\n Total: %d", defaultStats, len(defaultStats))
 }
 
+func (this *Character) ShortData() map[string]interface{} {
+	shortData := make(map[string]interface{})
+
+	shortData["Name"] = this.Name
+	shortData["Level"] = this.Level
+	shortData["Class"] = this.Class
+
+	return shortData
+}
+
 func (this *Character) SetDefaults() {
 	this.Stats = defaultStats[strings.ToLower(this.Class)]
 	this.Attributes = defaultAttributes[strings.ToLower(this.Class)]
@@ -48,7 +58,7 @@ func (this *Character) SetDefaults() {
 	this.HP = this.MaxHP
 	this.MP = this.MaxMP
 
-	this.RecalculateAttributes()
+	this.RecalculateStats()
 
 	glog.Infof("Setting default stats for character %i:\nS : %i\nA : %i", this, defaultStats[this.Class], defaultAttributes[this.Class])
 }
@@ -57,25 +67,25 @@ func (this *Character) ApplyEffect(effects ...*Effect) Character {
 	return Character{}
 }
 
-func (this *Character) RecalculateAttributes() {
-	this.RecalculateHp()
-	this.RecalculateMp()
+func (this *Character) RecalculateStats() {
+	this.RecalculateMaxHp()
+	this.RecalculateMaxMp()
 }
 
-func (this *Character) RecalculateHp() {
-	difference := this.HP / this.MaxHP * 100
+func (this *Character) RecalculateMaxHp() {
+	difference := this.HP / this.MaxHP * 100.0
 
-	this.MaxHP = this.Strength*(0.25*defaultAttrsibutes[strings.ToLower(this.Class)].Strength) +
-		-20*math.Cos(this.Level/60*(math.Pi/2)) + 20
+	this.MaxHP = float32(this.Strength)*(0.25*float32(defaultAttributes[strings.ToLower(this.Class)].Strength)) +
+		-20.0*float32(math.Cos(float64(this.Level)/60.0*(math.Pi/2))) + 20.0
 
-	this.HP = this.MaxHP * difference / 100
+	this.HP = this.MaxHP * difference / 100.0
 }
 
-func (this *Character) RecalculateMp() {
-	difference := this.MP / this.MaxMP * 100
+func (this *Character) RecalculateMaxMp() {
+	difference := this.MP / this.MaxMP * 100.0
 
-	this.MaxMP = this.Intelect*(0.25*defaultAttrsibutes[strings.ToLower(this.Class)].Intelect) +
-		-40*Math.cos(this.Level/60*(Math.PI/2)) + 40
+	this.MaxMP = float32(this.Intelect)*(0.25*float32(defaultAttributes[strings.ToLower(this.Class)].Intelect)) +
+		-40.0*float32(math.Cos(float64(this.Level)/60.0*(math.Pi/2))) + 40.0
 
-	this.MP = this.MaxMP * difference / 100
+	this.MP = this.MaxMP * difference / 100.0
 }

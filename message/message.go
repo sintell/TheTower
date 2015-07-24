@@ -23,6 +23,8 @@ const (
 	MSG_CREATE_CHARACTER
 	MSG_REMOVE_CHARACTER
 	MSG_CHECK_CHARACTER
+	MSG_LOGIN_CHARACTER
+
 	MSG_USER_ACTION
 
 	MSG_UA_LOAD_GAME_DATA
@@ -40,6 +42,7 @@ func init() {
 	db = models.GetDB()
 }
 
+// TODO: Move func from this module
 func GetUser(r io.Reader) (*models.User, error) {
 	dec := json.NewDecoder(r)
 	data := Message{}
