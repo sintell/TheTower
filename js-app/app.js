@@ -29,9 +29,9 @@
         this.ws.onmessage = function(e){
             var msg = JSON.parse(e.data);
             console.log('Got message with type', msg.type, msg);
-            this.eBinds.message.forEach(function(cb){cb(msg.data);}.bind(this));
-            if (this.eBinds['message.'+msg.type]) {
-                this.eBinds['message.'+msg.type].forEach(function(cb){cb(msg.data);}.bind(this));
+            this.eBinds.message.forEach(function(cb){cb(msg);}.bind(this));
+            if (this.eBinds['message.' + msg.type]) {
+                this.eBinds['message.' + msg.type].forEach(function(cb){cb(msg);}.bind(this));
             }
         }.bind(this);
         this.ws.onerror = function(e){
