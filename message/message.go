@@ -72,6 +72,6 @@ func GetUser(r io.Reader) (*models.User, error) {
 }
 
 func New(mType MessageType, uid string, data []uint8) Message {
-	glog.Infof("Creating new message with type %d from %i", mType, data)
+	glog.Infof("Creating new message with type %d for %s", mType, uid)
 	return Message{mType, json.RawMessage(data), uid}
 }

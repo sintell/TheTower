@@ -1,8 +1,6 @@
 package server
 
 import (
-	"errors"
-	"fmt"
 	"github.com/golang/glog"
 	"github.com/sintell/mmo-server/models"
 	"github.com/sintell/mmo-server/utils"
@@ -19,6 +17,11 @@ var game *Game
 
 func init() {
 	game = &Game{}
+	game.Characters = make(map[string]*models.Character)
+	game.Monsters = make(map[string]*models.Monster)
+	game.Locations = make(map[string]*models.Location)
+	game.Items = make(map[string]*models.Item)
+
 	game.LoadAssets()
 	glog.Info("Creating game instance")
 }
@@ -32,26 +35,27 @@ func GameInstance() *Game {
 	return game
 }
 
-func (g *Game) LoadAssets() {
-	err := utils.LoadSetting(&g.Monsters, "data/monsters.json")
+func (this *Game) LoadAssets() {
+	err := utils.LoadSetting(&this.Monsters, "data/monsters.json")
 	if err != nil {
 		panic(err.Error())
 	}
-	err = utils.LoadSetting(&g.Locations, "data/locations.json")
+	err = utils.LoadSetting(&this.Locations, "data/locations.json")
 	if err != nil {
 		panic(err.Error())
 	}
-	err = utils.LoadSetting(&g.Items, "data/items.json")
+	err = utils.LoadSetting(&this.Items, "data/items.json")
 	if err != nil {
 		panic(err.Error())
 	}
 }
 
-func (g *Game) LoginCharacter(uid string, character *models.Character) error {
-	if _, exists := g.Characters[uid]; exists {
-		glog.Errorf("Can't login character with uid %sCharacter already exists", uid)
-		return errors.New(fmt.Sprintf("Can't login character with uid %sCharacter already exists", uid))
+func (this *Game) LoginCharacter(uid string, character *models.Character) error {
+	if _, exists := this.Characters[uid]; exists {
+		glog.Warningf("There are already character in game for this player: %s", uid)
+		this.Characters[uid] = character
 	}
-	g.Characters[uid] = character
+
+	this.Characters[uid] = character
 	return nil
 }
