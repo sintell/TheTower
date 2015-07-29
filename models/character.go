@@ -55,8 +55,8 @@ func (this *Character) SetDefaults() {
 	this.Stats = defaultStats[strings.ToLower(this.Class)]
 	this.Attributes = defaultAttributes[strings.ToLower(this.Class)]
 
-	this.HP = this.MaxHP
-	this.MP = this.MaxMP
+	this.Hp = this.MaxHp
+	this.Mp = this.MaxMp
 
 	this.RecalculateStats()
 
@@ -73,19 +73,19 @@ func (this *Character) RecalculateStats() {
 }
 
 func (this *Character) RecalculateMaxHp() {
-	difference := this.HP / this.MaxHP * 100.0
+	difference := this.Hp / this.MaxHp * 100.0
 
-	this.MaxHP = float32(this.Strength)*(0.25*float32(defaultAttributes[strings.ToLower(this.Class)].Strength)) +
+	this.MaxHp = float32(this.Strength)*(0.25*float32(defaultAttributes[strings.ToLower(this.Class)].Strength)) +
 		-20.0*float32(math.Cos(float64(this.Level)/60.0*(math.Pi/2))) + 20.0
 
-	this.HP = this.MaxHP * difference / 100.0
+	this.Hp = this.MaxHp * difference / 100.0
 }
 
 func (this *Character) RecalculateMaxMp() {
-	difference := this.MP / this.MaxMP * 100.0
+	difference := this.Mp / this.MaxMp * 100.0
 
-	this.MaxMP = float32(this.Intelect)*(0.25*float32(defaultAttributes[strings.ToLower(this.Class)].Intelect)) +
+	this.MaxMp = float32(this.Intelect)*(0.25*float32(defaultAttributes[strings.ToLower(this.Class)].Intelect)) +
 		-40.0*float32(math.Cos(float64(this.Level)/60.0*(math.Pi/2))) + 40.0
 
-	this.MP = this.MaxMP * difference / 100.0
+	this.Mp = this.MaxMp * difference / 100.0
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/gorilla/websocket"
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type User struct {
@@ -24,11 +25,16 @@ func NewUser() (*User, error) {
 	user := User{}
 
 	h := md5.New()
-	h.Write([]byte(fmt.Sprintf("%d%s", user.ID, user.Email)))
+	h.Write([]byte(fmt.Sprintf("%d", time.Now().Nanosecond())))
 	uid := fmt.Sprintf("%x", h.Sum(nil))
 	glog.Infof("Setting uid value equal %s", string(uid))
 
+	name := NewName(uid, "User").String()
+	email := fmt.Sprintf("%s@%s.%s", name, "testmail", "com")
+
 	user.Uid = uid
+	user.Name = name
+	user.Email = email
 
 	db.Create(&user)
 	if db.Error != nil {
@@ -47,7 +53,7 @@ func (this *User) NewCharacter() error {
 
 	this.Characters = append(this.Characters, character)
 
-	glog.Infof("Chreating new character for %i", this)
+	glog.Infof("Chreating new character for %s %s", this.Name, this.Uid)
 	db.Save(this)
 
 	if err := db.Error; err != nil {
