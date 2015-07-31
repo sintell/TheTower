@@ -12,12 +12,12 @@ type Character struct {
 	gorm.Model
 	Attributes
 	Stats
-	Level   uint   `json: "level"`
-	Name    string `json:"name" sql:"unique"`
-	Class   string `json:"class"`
-	UserID  uint
-	Effects []*Effect `sql:"-"`
-	Owner   *User     `json:"-" sql:"-"`
+	Level           uint      `json: "level"`
+	Name            string    `json:"name" sql:"unique"`
+	Class           string    `json:"class"`
+	Effects         []*Effect `sql:"-"`
+	CurrentLocation string    `json:"homeLocation" sql:"default:'mirage_bay'"`
+	UserID          uint
 }
 
 type CClass uint8
@@ -54,6 +54,7 @@ func (this *Character) ShortData() map[string]interface{} {
 func (this *Character) SetDefaults() {
 	this.Stats = defaultStats[strings.ToLower(this.Class)]
 	this.Attributes = defaultAttributes[strings.ToLower(this.Class)]
+	this.CurrentLocation = STARTING_LOCATION
 
 	this.Hp = this.MaxHp
 	this.Mp = this.MaxMp

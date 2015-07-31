@@ -79,4 +79,9 @@ func (this *Server) NewConnection(conn *websocket.Conn) (string, error) {
 func (this *Server) CloseConnection(uid string) {
 	glog.Infof("Closing connection from: %s", uid)
 	delete(this.Users, uid)
+	game.LogoutCharacter(uid)
+}
+
+func (this *Server) Stop() {
+	game.Stop()
 }

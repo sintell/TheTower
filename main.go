@@ -26,12 +26,15 @@ func main() {
 
 	osSignals := make(chan os.Signal, 1)
 	signal.Notify(osSignals, os.Interrupt)
+	var srv *server.Server
 
 	go func() {
 		<-osSignals
 		glog.Info("Got SIGINT, terminating app")
+		srv.Stop()
 		glog.Flush()
 		os.Exit(0)
 	}()
-	server.Init()
+
+	srv = server.Init()
 }

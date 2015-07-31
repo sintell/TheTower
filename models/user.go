@@ -46,38 +46,46 @@ func NewUser() (*User, error) {
 
 func (this *User) NewCharacter() error {
 	name := NewName(this.Email)
-	class := "MAGE"
-
-	character := Character{Name: name.String(), Class: class, Owner: this}
+	class := []string{"MAGE", "WARRIOR", "PRIEST"}
+	character := Character{Name: name.String(), Class: class}
 	character.SetDefaults()
 
 	this.Characters = append(this.Characters, character)
 
-	glog.Infof("Chreating new character for %s %s", this.Name, this.Uid)
-	db.Save(this)
-
-	if err := db.Error; err != nil {
+	if err := db.Save(this).Error; err != nil {
+		glog.Errorf("Error on user save: %s", err.Error())
 		return err
 	}
+	glog.Infof("Chreating new character for %s %s", this.Name, this.Uid, character)
+	this.LoadCharacters()
+
+	this.SetActiveCharacter(this.Characters[0].ID)
 
 	return nil
 }
 
 func (this *User) LoadCharacters() {
-	if len(this.Characters) == 0 {
-		if err := db.Model(this).Related(this.Characters).Error; err != nil {
-			glog.Errorf("Error requesting characters information: %s", err.Error())
-		} else {
-			glog.Infof("Characters loaded: %i", this.Characters)
-		}
+	if err := db.Model(this).Related(&this.Characters).Error; err != nil {
+		glog.Errorf("Error requesting characters information: %s", err.Error())
+	} else {
+		glog.Infof("Characters loaded: %i", this.Characters)
 	}
 }
 
 func (this *User) SetActiveCharacter(characterId uint) *Character {
-	for _, char := range this.Characters {
-		if char.ID == characterId {
-			this.ActiveCharacter = &char
+	glog.Infof("Setting active character: %d\n", characterId)
+	var charLinc *Character
+	for _, character := range this.Characters {
+		glog.Infof("%d, %d\n", character.ID, characterId)
+		if character.ID == characterId {
+			charLinc = &character
+			this.ActiveCharacter = charLinc
 		}
+	}
+
+	if len(this.Characters) == 0 {
+		this.LoadCharacters()
+		this.SetActiveCharacter(characterId)
 	}
 
 	return this.ActiveCharacter

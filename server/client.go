@@ -72,9 +72,8 @@ func (this *Client) Handle() {
 					glog.Errorf("Error creating character: %s", err.Error())
 					break
 				}
-
+				game.LoginCharacter(this.User.Uid, this.User.ActiveCharacter)
 				this.Send(this.User.Characters, message.MSG_CHARACTER_DATA)
-				game.LoginCharacter(this.User.Uid, &this.User.Characters[0])
 
 			}
 		case message.MSG_REMOVE_CHARACTER:

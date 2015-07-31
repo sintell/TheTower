@@ -1,6 +1,13 @@
 {
     "mirage_bay": {
+        "ID": 0,
         "name": "Mirage Bay",
         "type": "shore"
+    },
+
+    "mirage_bay_arena": {
+        "ID": 1,
+        "name": "Grand Arena",
+        "type": "arena"
     }
 }
