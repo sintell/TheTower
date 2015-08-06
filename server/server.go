@@ -1,7 +1,6 @@
 package server
 
 import (
-	"flag"
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/gorilla/websocket"
@@ -14,10 +13,6 @@ import (
 type Server struct {
 	utils.Settings
 	Users map[string]*Client
-}
-
-func init() {
-	flag.Parse()
 }
 
 func Init() *Server {

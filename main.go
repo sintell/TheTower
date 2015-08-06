@@ -10,6 +10,7 @@ import (
 
 // Depends on: gorm, gorilla-websockets
 // Client -> Front -> Auth -> Back -> DB -> back -> Front -> Client
+
 func init() {
 	flag.Parse()
 }

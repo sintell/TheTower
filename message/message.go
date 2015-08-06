@@ -2,7 +2,6 @@ package message
 
 import (
 	"encoding/json"
-	"flag"
 	"github.com/golang/glog"
 	"github.com/jinzhu/gorm"
 	"github.com/sintell/mmo-server/models"
@@ -38,7 +37,6 @@ const (
 var db gorm.DB
 
 func init() {
-	flag.Parse()
 	db = models.GetDB()
 }
 
