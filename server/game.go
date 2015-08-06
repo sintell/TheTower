@@ -100,6 +100,7 @@ func (this *Game) Loop() chan *models.Character {
 			case <-this.stopChannel:
 				{
 					glog.Infof("Stopping game loop for world: %s", this.World.Name)
+					ticker.Stop()
 					break
 				}
 			default:
