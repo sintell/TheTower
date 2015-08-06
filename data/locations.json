@@ -2,12 +2,18 @@
     "mirage_bay": {
         "ID": 0,
         "name": "Mirage Bay",
-        "type": "shore"
+        "type": "location"
     },
 
     "mirage_bay_arena": {
         "ID": 1,
         "name": "Grand Arena",
         "type": "arena"
+    },
+
+    "mirage_bay_travelers_house": {
+        "ID": 2,
+        "name": "Traveler's House",
+        "type": "location"
     }
 }
