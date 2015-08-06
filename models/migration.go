@@ -1,6 +1,7 @@
 package models
 
 import (
+	"flag"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
@@ -10,8 +11,12 @@ import (
 
 var db gorm.DB
 var dbConnString string
+var dbLogQueries bool
 
 func init() {
+	flag.BoolVar(&dbLogQueries, "logdbqueries", false, "log all db queries to stdout")
+	flag.Parse()
+
 	settings := utils.Settings{}
 	settings.LoadArgs()
 
@@ -41,7 +46,7 @@ func GetDB() gorm.DB {
 		os.Exit(2)
 	}
 
-	DB.LogMode(true)
+	DB.LogMode(dbLogQueries)
 	DB.DB().SetMaxIdleConns(50)
 	DB.DB().SetMaxOpenConns(300)
 

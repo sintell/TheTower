@@ -1,7 +1,6 @@
 package models
 
 import (
-	"flag"
 	"github.com/golang/glog"
 	"github.com/jinzhu/gorm"
 	"github.com/sintell/mmo-server/utils"
@@ -25,8 +24,6 @@ var defaultAttributes map[string]Attributes
 var defaultStats map[string]Stats
 
 func init() {
-	flag.Parse()
-
 	err := utils.LoadSetting(&defaultAttributes, "data/defaultAttributes.json")
 	if err != nil {
 		glog.Error("Can't load default attributes. Reason:", err.Error())
