@@ -12,12 +12,12 @@ type Character struct {
 	gorm.Model
 	Attributes
 	Stats
-	Level           uint      `json: "level"`
-	Name            string    `json:"name" sql:"unique"`
-	Class           string    `json:"class"`
-	Effects         []*Effect `sql:"-"`
-	CurrentLocation string    `json:"homeLocation" sql:"default:'mirage_bay'"`
+	Level           uint   `json: "level"`
+	Name            string `json:"name" sql:"unique"`
+	Class           string `json:"class"`
+	CurrentLocation string `json:"homeLocation" sql:"default:'mirage_bay'"`
 	UserID          uint
+	AbilityQueue    []Effect `json:"-" sql:"-"`
 }
 
 type CClass uint8
@@ -64,10 +64,6 @@ func (this *Character) SetDefaults() {
 	glog.Infof("Setting default stats for character %i:\nS : %i\nA : %i", this, defaultStats[this.Class], defaultAttributes[this.Class])
 }
 
-func (this *Character) ApplyEffect(effects ...*Effect) Character {
-	return Character{}
-}
-
 func (this *Character) RecalculateStats() {
 	this.RecalculateMaxHp()
 	this.RecalculateMaxMp()
@@ -89,4 +85,8 @@ func (this *Character) RecalculateMaxMp() {
 		-40.0*float32(math.Cos(float64(this.Level)/60.0*(math.Pi/2))) + 40.0
 
 	this.Mp = this.MaxMp * difference / 100.0
+}
+
+func (this *Character) ApplyEffect(effects ...Effect) Character {
+	return Character{}
 }

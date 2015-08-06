@@ -6,6 +6,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/gorilla/websocket"
 	"github.com/jinzhu/gorm"
+	"math/rand"
 	"time"
 )
 
@@ -46,8 +47,8 @@ func NewUser() (*User, error) {
 
 func (this *User) NewCharacter() error {
 	name := NewName(this.Email)
-	class := []string{"MAGE", "WARRIOR", "PRIEST"}
-	character := Character{Name: name.String(), Class: class}
+	classes := []string{"MAGE", "WARRIOR", "PRIEST"}
+	character := Character{Name: name.String(), Class: classes[rand.Int31n(int32(len(classes)-1))]}
 	character.SetDefaults()
 
 	this.Characters = append(this.Characters, character)

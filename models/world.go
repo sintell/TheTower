@@ -34,7 +34,21 @@ func (this *World) Tick(t time.Time) {
 	if this.ticks%500 == 0 {
 		for _, loc := range this.Locations {
 			if charNumbers := len(loc.Characters); charNumbers > 0 {
-				glog.Infof("Tick#%d: there are %d characters online in location %s", this.ticks, charNumbers, loc.Name)
+				glog.Infof("Tick#%d: there are %d characters online at %s", this.ticks, charNumbers, loc.Name)
+				for _, character := range loc.Characters {
+					if len(character.AbilityQueue) > 0 {
+						ability := character.AbilityQueue[0]
+						if ability.ActivationTime() == EFFECT_APPLIES_AT_START {
+							ability.Target().ApplyEffect(ability)
+							character.AbilityQueue = character.AbilityQueue[1:]
+						} else {
+							if t.UnixNano() <= int64(ability.Start()+uint64(ability.Duration().Nanoseconds())) {
+								ability.Target().ApplyEffect(ability)
+								character.AbilityQueue = character.AbilityQueue[1:]
+							}
+						}
+					}
+				}
 			} else {
 				glog.Infof("Tick#%d: there are no characters online, %s", this.ticks, loc.Name)
 			}
