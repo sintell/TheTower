@@ -4,32 +4,32 @@ import (
 	"github.com/golang/glog"
 	"github.com/sintell/mmo-server/models"
 	"github.com/sintell/mmo-server/utils"
-	"time"
 )
 
 type Game struct {
+	Creatures    map[string]models.Creature
 	Characters   map[string]*models.Character
-	Monsters     map[string]*models.Monster
 	Locations    map[string]*models.Location
 	Items        map[string]*models.Item
 	World        *models.World
-	loginChannel chan *models.Character
-	stopChannel  chan interface{}
+	loginChannel chan models.Creature
+	stopChannel  chan struct{}
 }
 
 var game *Game
 
 func GameInit() {
 	game = &Game{}
-	game.Characters = make(map[string]*models.Character)
-	game.Monsters = make(map[string]*models.Monster)
+	game.Creatures = make(map[string]models.Creature)
 	game.Locations = make(map[string]*models.Location)
 	game.Items = make(map[string]*models.Item)
 	game.World = models.NewWorld()
 
+	game.loginChannel = game.Loop()
+	game.stopChannel = make(chan struct{})
+
 	game.LoadAssets()
 	glog.Info("Creating game instance")
-	game.loginChannel = game.Loop()
 }
 
 func init() {
@@ -45,51 +45,52 @@ func GameInstance() *Game {
 }
 
 func (this *Game) LoadAssets() {
-	err := utils.LoadSetting(&this.Monsters, "data/monsters.json")
+	err := utils.LoadSetting(&this.Items, "data/items.json")
 	if err != nil {
 		panic(err.Error())
 	}
 
-	err = utils.LoadSetting(&this.Items, "data/items.json")
-	if err != nil {
-		panic(err.Error())
+	npcs := models.GetNpcs()
+	for _, npc := range npcs {
+		this.LoginCharacter(npc)
 	}
 }
 
-func (this *Game) LoginCharacter(uid string, character *models.Character) error {
-	if _, exists := this.Characters[uid]; exists {
+func (this *Game) LoginCharacter(character models.Creature) error {
+	uid := character.CreatureUid()
+	if _, exists := this.Creatures[uid]; exists {
 		glog.Warningf("There are already character in game for this player: %s", uid)
 	}
-	glog.Infof("%s,\n\n%i", uid, character)
 
 	this.loginChannel <- character
-	this.Characters[uid] = character
+
+	switch character.Type() {
+	case models.PLAYER:
+		this.Characters[uid] = character.(*models.Character)
+	case models.NPC:
+		this.Creatures[uid] = character
+	}
+
 	return nil
 }
 
 func (this *Game) LogoutCharacter(uid string) {
-	if _, exists := this.Characters[uid]; exists {
+	if _, exists := this.Creatures[uid]; exists {
 		glog.Infof("Logging out character: %s", uid)
 
-		// this.World.RemoveCharacter(character.UserID)
-		delete(this.Characters, uid)
+		this.World.RemoveCharacter(uid)
+		delete(this.Creatures, uid)
 	}
 }
 
-func (this *Game) Loop() chan *models.Character {
-	ticker := time.NewTicker(time.Millisecond)
-	logging := make(chan *models.Character)
-	this.stopChannel = make(chan interface{})
-
+func (this *Game) Loop() chan models.Creature {
+	loginChannel := make(chan models.Creature, 100000)
 	go func(this *Game) {
 		for {
-			timer := <-ticker.C
-			this.World.Tick(timer)
-
 			select {
-			case character := <-logging:
+			case character := <-loginChannel:
 				{
-					this.World.MoveCharacter(character, character.CurrentLocation)
+					this.World.MoveCharacter(&character, character.CreatureLocation())
 				}
 			default:
 				{
@@ -100,7 +101,6 @@ func (this *Game) Loop() chan *models.Character {
 			case <-this.stopChannel:
 				{
 					glog.Infof("Stopping game loop for world: %s", this.World.Name)
-					ticker.Stop()
 					break
 				}
 			default:
@@ -111,7 +111,7 @@ func (this *Game) Loop() chan *models.Character {
 		}
 	}(this)
 
-	return logging
+	return loginChannel
 }
 
 func (this *Game) Stop() {

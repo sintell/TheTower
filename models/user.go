@@ -22,7 +22,6 @@ type User struct {
 }
 
 func NewUser() (*User, error) {
-	db := GetDB()
 	user := User{}
 
 	h := md5.New()
@@ -48,7 +47,12 @@ func NewUser() (*User, error) {
 func (this *User) NewCharacter() error {
 	name := NewName(this.Email)
 	classes := []string{"MAGE", "WARRIOR", "PRIEST"}
-	character := Character{Name: name.String(), Class: classes[rand.Int31n(int32(len(classes)-1))]}
+	character := Character{
+		Name:          name.String(),
+		Class:         classes[rand.Int31n(int32(len(classes)-1))],
+		OwnerUid:      this.Uid,
+		characterType: PLAYER,
+	}
 	character.SetDefaults()
 
 	this.Characters = append(this.Characters, character)
@@ -65,6 +69,18 @@ func (this *User) NewCharacter() error {
 	return nil
 }
 
+func (this *User) Populate() error {
+	glog.Infof("Checking for user existance")
+
+	if db.Where(this).Preload("Characters").First(this).RecordNotFound() {
+		glog.Errorf("Requested user has uid but no matching record in db: %s", this.Uid)
+		return gorm.RecordNotFound
+	} else {
+		glog.Infof("Requested user found: %s:%s, %s", this.Name, this.Email, this.Uid)
+		return nil
+	}
+}
+
 func (this *User) LoadCharacters() {
 	if err := db.Model(this).Related(&this.Characters).Error; err != nil {
 		glog.Errorf("Error requesting characters information: %s", err.Error())
@@ -74,10 +90,8 @@ func (this *User) LoadCharacters() {
 }
 
 func (this *User) SetActiveCharacter(characterId uint) *Character {
-	glog.Infof("Setting active character: %d\n", characterId)
 	var charLinc *Character
 	for _, character := range this.Characters {
-		glog.Infof("%d, %d\n", character.ID, characterId)
 		if character.ID == characterId {
 			charLinc = &character
 			this.ActiveCharacter = charLinc

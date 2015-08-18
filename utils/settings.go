@@ -3,6 +3,8 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	"flag"
+	"fmt"
 	"github.com/golang/glog"
 	"io/ioutil"
 )
@@ -20,13 +22,20 @@ type Settings struct {
 }
 
 const (
-	SETTINGS_PATH = "settings.json"
+	SETTINGS_PATH   = "settings.json"
+	SETTINGS_PREFIX = "."
 )
+
+var filePrefix string
+
+func init() {
+	flag.StringVar(&filePrefix, "configs", "", "use custom prefix for setting files")
+}
 
 func (s *Settings) LoadArgs(customPath ...string) error {
 	settingsExt := Settings{}
 
-	settingsRaw, err := ioutil.ReadFile(SETTINGS_PATH)
+	settingsRaw, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", filePrefix, SETTINGS_PATH))
 
 	if err != nil {
 		return err
@@ -60,10 +69,14 @@ func (s *Settings) LoadArgs(customPath ...string) error {
 }
 
 func LoadSetting(arg interface{}, customPath ...string) error {
+	if filePrefix == "" {
+		filePrefix = SETTINGS_PREFIX
+	}
+
 	if len(customPath) > 0 {
 		for _, path := range customPath {
 			glog.Infof("Loading: %s", path)
-			settingsExtRaw, err := ioutil.ReadFile(path)
+			settingsExtRaw, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", filePrefix, path))
 
 			if err != nil {
 				return err
@@ -77,7 +90,7 @@ func LoadSetting(arg interface{}, customPath ...string) error {
 			glog.Infof("Loaded: %s", path)
 		}
 	} else {
-		settingsRaw, err := ioutil.ReadFile(SETTINGS_PATH)
+		settingsRaw, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", filePrefix, SETTINGS_PATH))
 
 		if err != nil {
 			return err

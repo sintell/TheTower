@@ -3,7 +3,6 @@ package message
 import (
 	"encoding/json"
 	"github.com/golang/glog"
-	"github.com/jinzhu/gorm"
 	"github.com/sintell/mmo-server/models"
 	"io"
 )
@@ -34,15 +33,9 @@ const (
 const (
 	MSG_USER_DATA = 1 + iota
 	MSG_CHARACTER_DATA
+	MSG_GAME_DATA
 )
 
-var db gorm.DB
-
-func init() {
-	db = models.GetDB()
-}
-
-// TODO: Move func from this module
 func GetUser(r io.Reader) (*models.User, error) {
 	dec := json.NewDecoder(r)
 	data := Message{}
@@ -53,20 +46,15 @@ func GetUser(r io.Reader) (*models.User, error) {
 		return nil, err
 	}
 
-	glog.Infof("Checking for user existance")
+	user.Uid = data.Uid
+	err = user.Populate()
 
-	if data.Uid != "" {
-		if db.Where(&models.User{Uid: data.Uid}).Preload("Characters").First(user).RecordNotFound() {
-			glog.Errorf("Requested user has uid but no matching record in db: %s", data.Uid)
-		} else {
-			glog.Infof("Requested user found: %s:%s, %s", user.Name, user.Email, user.Uid)
-			return user, nil
-		}
-	}
-	glog.Infof("Connection from new user")
-	user, err = models.NewUser()
 	if err != nil {
-		return nil, err
+		glog.Infof("Connection from new user")
+		user, err = models.NewUser()
+		if err != nil {
+			return nil, err
+		}
 	}
 	return user, nil
 }

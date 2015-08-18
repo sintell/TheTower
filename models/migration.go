@@ -9,7 +9,9 @@ import (
 	"os"
 )
 
-var db gorm.DB
+type dbInterface interface{}
+
+var db *gorm.DB
 var dbConnString string
 var dbLogQueries bool
 
@@ -19,13 +21,10 @@ func init() {
 
 	settings := utils.Settings{}
 	settings.LoadArgs()
-
 	dbConnString = fmt.Sprintf("user=%s dbname=%s sslmode=disable password=%s",
 		settings.DbUser, settings.DbName, settings.DbPass)
 
-	fmt.Println(dbConnString)
-
-	db = GetDB()
+	db := getDB()
 	db.DropTableIfExists(&User{})
 	db.DropTableIfExists(&Character{})
 
@@ -38,7 +37,11 @@ func init() {
 	db.Model(&Character{}).AddIndex("idx_character_level", "level", "deleted_at")
 }
 
-func GetDB() gorm.DB {
+func getDB() *gorm.DB {
+	if db != nil {
+		return db
+	}
+
 	DB, err := gorm.Open("postgres", dbConnString)
 
 	if err != nil {
@@ -49,6 +52,7 @@ func GetDB() gorm.DB {
 	DB.LogMode(dbLogQueries)
 	DB.DB().SetMaxIdleConns(50)
 	DB.DB().SetMaxOpenConns(300)
+	db = &DB
 
-	return DB
+	return db
 }
