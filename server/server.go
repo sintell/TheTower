@@ -1,11 +1,11 @@
 package server
 
 import (
+	"flag"
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/gorilla/websocket"
 	"github.com/sintell/mmo-server/message"
-	"github.com/sintell/mmo-server/models"
 	"github.com/sintell/mmo-server/utils"
 	"net/http"
 )
@@ -16,16 +16,12 @@ type Server struct {
 }
 
 func Init() *Server {
+	flag.Parse()
 	server := &Server{Users: make(map[string]*Client)}
 	err := server.LoadArgs()
 
 	if err != nil {
 		panic(err.Error())
-	}
-
-	db := models.GetDB()
-	if db.Error != nil {
-		fmt.Errorf("%s", db.Error.Error())
 	}
 
 	upgrader := websocket.Upgrader{
@@ -54,8 +50,10 @@ func Init() *Server {
 	})
 
 	glog.Infof("App started on %s\n", fmt.Sprintf("%s:%s", server.Ip, server.Port))
-	http.ListenAndServe(fmt.Sprintf("%s:%s", server.Ip, server.Port), nil)
-
+	err = http.ListenAndServe(fmt.Sprintf("%s:%s", server.Ip, server.Port), nil)
+	if err != nil {
+		glog.Fatal(err.Error())
+	}
 	return server
 }
 
@@ -79,4 +77,9 @@ func (this *Server) NewConnection(conn *websocket.Conn) (string, error) {
 func (this *Server) CloseConnection(uid string) {
 	glog.Infof("Closing connection from: %s", uid)
 	delete(this.Users, uid)
+	game.LogoutCharacter(uid)
+}
+
+func (this *Server) Stop() {
+	game.Stop()
 }

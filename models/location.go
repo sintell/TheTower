@@ -5,9 +5,17 @@ import (
 )
 
 type Location struct {
-	gorm.Model
-	Name       string     `json:"name"`
-	Type       string     `json:"type"`
-	Creatures  []Creature `json:"creatures;omitempty"`
-	Characters []string   `json:"characters;omitempty"`
+	gorm.Model `json:"-"`
+	Name       string               `json:"name"`
+	Key        string               `json:"key"`
+	Type       string               `json:"type"`
+	Creatures  map[string]*Creature `json:"-"`
 }
+
+type LocationInfo struct {
+	Name           string
+	Type           string
+	CreaturesCount uint
+}
+
+const STARTING_LOCATION = "mirage_bay"

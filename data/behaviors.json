@@ -1,0 +1,14 @@
+{
+    "questgiver": {
+        "name": "questgiver"
+    },
+
+    "teleporter": {
+        "name": "teleporter"
+    },
+
+    "traveller": {
+        "name": "traveller"
+    },
+
+}

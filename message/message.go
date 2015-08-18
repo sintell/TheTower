@@ -3,7 +3,6 @@ package message
 import (
 	"encoding/json"
 	"github.com/golang/glog"
-	"github.com/jinzhu/gorm"
 	"github.com/sintell/mmo-server/models"
 	"io"
 )
@@ -23,6 +22,8 @@ const (
 	MSG_CREATE_CHARACTER
 	MSG_REMOVE_CHARACTER
 	MSG_CHECK_CHARACTER
+	MSG_LOGIN_CHARACTER
+
 	MSG_USER_ACTION
 
 	MSG_UA_LOAD_GAME_DATA
@@ -32,13 +33,8 @@ const (
 const (
 	MSG_USER_DATA = 1 + iota
 	MSG_CHARACTER_DATA
+	MSG_GAME_DATA
 )
-
-var db gorm.DB
-
-func init() {
-	db = models.GetDB()
-}
 
 func GetUser(r io.Reader) (*models.User, error) {
 	dec := json.NewDecoder(r)
@@ -50,25 +46,20 @@ func GetUser(r io.Reader) (*models.User, error) {
 		return nil, err
 	}
 
-	glog.Infof("Checking for user existance")
+	user.Uid = data.Uid
+	err = user.Populate()
 
-	if data.Uid != "" {
-		if db.Where(&models.User{Uid: data.Uid}).Preload("Characters").First(user).RecordNotFound() {
-			glog.Errorf("Requested user has uid but no matching record in db: %s", data.Uid)
-		} else {
-			glog.Infof("Requested user found: %s:%s, %s", user.Name, user.Email, user.Uid)
-			return user, nil
-		}
-	}
-	glog.Infof("Connection from new user")
-	user, err = models.NewUser()
 	if err != nil {
-		return nil, err
+		glog.Infof("Connection from new user")
+		user, err = models.NewUser()
+		if err != nil {
+			return nil, err
+		}
 	}
 	return user, nil
 }
 
 func New(mType MessageType, uid string, data []uint8) Message {
-	glog.Infof("Creating new message with type %d from %i", mType, data)
+	glog.Infof("Creating new message with type %d for %s", mType, uid)
 	return Message{mType, json.RawMessage(data), uid}
 }

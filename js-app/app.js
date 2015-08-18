@@ -11,7 +11,8 @@
 
     // Response type
     var MSG_USER_DATA = 1 + 0,
-        MSG_CHARACTER_DATA = 1 + 1;
+        MSG_CHARACTER_DATA = 1 + 1,
+        MSG_GAME_DATA = 1 + 2;
 
     var WsWrapper = function(addr) {
         this.ws = new WebSocket(addr);
@@ -29,9 +30,9 @@
         this.ws.onmessage = function(e){
             var msg = JSON.parse(e.data);
             console.log('Got message with type', msg.type, msg);
-            this.eBinds.message.forEach(function(cb){cb(msg.data);}.bind(this));
-            if (this.eBinds['message.'+msg.type]) {
-                this.eBinds['message.'+msg.type].forEach(function(cb){cb(msg.data);}.bind(this));
+            this.eBinds.message.forEach(function(cb){cb(msg);}.bind(this));
+            if (this.eBinds['message.' + msg.type]) {
+                this.eBinds['message.' + msg.type].forEach(function(cb){cb(msg);}.bind(this));
             }
         }.bind(this);
         this.ws.onerror = function(e){
@@ -72,12 +73,13 @@
         };
     };
 
-    var Game = function(connection) {
+    var Game = function(connection, drawer) {
         this.c = connection;
         this.user = {};
         this.characters = [];
         this.classes = ['warrior', 'priest', 'mage'];
         this.uid = "";
+        this.gameData = {};
 
         this.c.on('message', function(data) {
             console.log(data);
@@ -98,6 +100,12 @@
                 console.log('Got characer data:', this.characters);
                 this.c.trigger('character:ready');
             }
+        }.bind(this));
+
+        this.c.on('message', MSG_GAME_DATA, function(gameData) {
+            console.log('Got game data:', gameData);
+            this.gameData = gameData.data;
+            drawer.drawGameData(this.gameData);
         }.bind(this));
 
         return {
@@ -162,7 +170,7 @@
                 console.log('Creating new character');
                 this.c.send({type: MSG_CREATE_CHARACTER, uid: uid});
 
-                this.c.on('message', MSG_CREATE_CHARACTER, function(msg) {
+                this.c.on('message', MSG_CHARACTER_DATA, function(msg) {
                     this.characters = this.characters.concat(msg.data.characters);
                     console.log('Got character data:', this.characters[0]);
                 }.bind(this));
@@ -174,9 +182,68 @@
         };
     };
 
+    var Drawer = function() {
+        function $(selector, ctx) {
+            if (ctx) {
+                return document.querySelectorAll(['.' + ctx.className, selector].join(' '))[0];
+            }
+            return document.querySelectorAll(selector)[0];
+        }
+
+        function keyFromString(key) {
+            return '.Game-' + key.toString().toUpperCase();
+        }
+
+        function $el(type, attributes) {
+            var el = document.createElement(type);
+            Object.keys(attributes).forEach(function(attribute) {
+                el.setAttribute(attribute, attributes[attribute]);
+            });
+
+            return el;
+        }
+
+        this.rootElement = $('.Game-Root')[0];
+
+        this.drawBlock = function(data, blockId) {
+            if (!data) return;
+            console.log('Drawing: ', blockId);
+            var block = $(keyFromString(blockId));
+            var keys = Object.keys(data);
+
+            keys.forEach(function(key) {
+                if (typeof data[key] === 'object') {
+                    var el = $el('div', {'class': 'Game-' + key.toString().toUpperCase()});
+                    block.appendChild(el);
+
+                    this.drawBlock(data[key], key);
+                }
+                var element =  $(keyFromString(key), block);
+                if (element) {
+                    element.appendChild(data[key]);
+                } else {
+                    var el2 = $el('div', {'class': 'Game-' + key.toString().toUpperCase()});
+                    el2.innerText = data[key];
+                    block.appendChild(el2);
+
+                }
+            }.bind(this));
+        };
+
+        return {
+            drawGameData: function(gameData) {
+                var keys = Object.keys(gameData);
+                keys.forEach(function(key) {
+                    this.drawBlock(gameData[key], key);
+                }.bind(this));
+            }.bind(this)
+        };
+    };
+    var drawer = new Drawer();
+
     var ws = new WsWrapper('ws://127.0.0.1:9090/ws');
 
-    var game = new Game(ws);
+    var game = new Game(ws, drawer);
 
     ws.on('open', function() {
         if (!game.checkLocalUser()) {

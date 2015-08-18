@@ -1,0 +1,27 @@
+[
+    {
+        "behavior": "teleporter",
+        "locations": [{"mirage_bay_travelers_house": 1000000}],
+        "class": "MAGE"
+    },
+    {
+        "behavior": "fighter",
+        "locations": [{"mirage_bay_arena": 600000}],
+        "class": "WARRIOR"
+    },
+    {
+        "behavior": "healer",
+        "locations": [{"mirage_bay": 100}],
+        "class": "PRIEST"
+    },
+    {
+        "behavior": "merchant",
+        "locations": [{"mirage_bay": 20}],
+        "class": "WARRIOR"
+    },
+    {
+        "behavior": "dummy",
+        "locations": [{"mirage_bay_arena": 30}],
+        "class": "WARRIOR"
+}
+]

@@ -72,8 +72,13 @@ func (this *Client) Handle() {
 					glog.Errorf("Error creating character: %s", err.Error())
 					break
 				}
-
+				game.LoginCharacter(this.User.ActiveCharacter)
 				this.Send(this.User.Characters, message.MSG_CHARACTER_DATA)
+				this.Send(map[string]interface{}{
+					"items":           game.Items,
+					"locations":       game.World.LocationsInfo(),
+					"nearbyCreatures": game.World.Locations[this.User.ActiveCharacter.CurrentLocation].Creatures,
+				}, message.MSG_GAME_DATA)
 
 			}
 		case message.MSG_REMOVE_CHARACTER:
@@ -82,7 +87,15 @@ func (this *Client) Handle() {
 			}
 		case message.MSG_CHECK_CHARACTER:
 			{
+				glog.Info("Requested characters")
+				this.User.LoadCharacters()
+				var data []map[string]interface{}
 
+				for _, char := range this.User.Characters {
+					data = append(data, char.ShortData())
+				}
+
+				this.Send(data, message.MSG_CHARACTER_DATA)
 			}
 		case message.MSG_USER_ACTION:
 			{
